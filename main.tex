@@ -1,266 +1,158 @@
-\documentclass[a4paper,12pt]{report}
-\usepackage{listings}
-\usepackage{wrapfig}
-\usepackage{graphicx} 
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{graphicx}
+\usepackage{hyperref} 
 \usepackage{amsmath}
 \usepackage{mathabx}
-\usepackage[a4paper,width=150mm,top=25mm,bottom=25mm,bindingoffset=6mm]{geometry}
+\usepackage[printonlyused,withpage]{acronym}
 
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%\urlstyle{rm}
+%
 \begin{document}
+%
+\title{MiniSat Report}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{Șova Dumitru Ștefan Andrei \href{dumitru.sova01@e-uvt.ro}{dumitru.sova01@e-uvt.ro} \\
+   \and Andries Rafael Gabriel \href{mailto:rafael.andries00@e-uvt.ro}{rafael.andries00@e-uvt.ro} \\
+   \and Stoentel Alexandru-Eduard \href{mailto:alexandru.stoentel01@e-uvt.ro}{alexandru.stoentel01@e-uvt.ro} \\
+   \and Nenescu Eugeniu \href{mailto:eugeniu.nenescu00@e-uvt.ro}{eugeniu.nenescu00@e-uvt.ro} }
+%
+\authorrunning{F. Author et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{West University of Timișoara, Bulevardul Vasile Pârvan 4, Timișoara 300223}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
 
-\thispagestyle{plain}
-\begin{center}
-    \Large
-    \textbf{Privacy, safety, and security}
-        
-    \vspace{0.4cm}
-    \large
-    \textbf{Șova Dumitru Ștefan Andrei}
+Since time immemorial, logic has helped us make sense of the world that surrounds us, from our ancestors' philosophical inquiries to its use in modern mathematics and informatics. Logic bridges the gap between formal and informal knowledge, proving essential in fields as diverse as databases, programming languages (\ac{e.g.}, Prolog), and propositional logic. This paper focuses on a compelling area within informatics: the \ac{SAT}, a foundational challenge in computational complexity. \ac{SAT} asks whether a set of variable assignments can satisfy a Boolean formula and stands as the first problem proven to be \ac{NP-complete}. Our main focus will be on MiniSat, an \ac{SAT} solver designed to address this challenge efficiently. Finally, such solvers enabled tackling practical problems with millions of variables, benefiting research and industry.
 
-    \vspace{0.4cm}
-    \large
-    dumitru.sova01@e-uvt.ro
+This report includes benchmarks from recent \ac{SAT} competitions, alongside minor modifications to MiniSat’s original code, to compare results and evaluate its performance across different problem instances. With time results and outputs available on GitHub, this analysis highlights MiniSat’s capabilities and underscores the broader impact of \ac{SAT} solvers in advancing computational problem-solving. GitHub link for the project: \url{https://github.com/AndiSova/VF-Software-Engineering-2024-Project}
 
-    \vspace{0.4cm}
-    15.05.2023
-       
-    \vspace{0.9cm}
-    \textbf{Abstract}
-\end{center}
-In today's world, we are more and more affected by changes in technology, which often leads to a new way of interacting with the world and people around us. The effects of these innovations are in most cases beneficial to us and our society, whether it is the emergence of vehicles that allow us to travel great distances in a short time, or the age of the Internet that has revolutionized the way we share information and communicate with each other. However, progress always has side effects, some of which unfortunately bring new problems that we have to deal with. One such issue is security, privacy, and the safety of our activities in online spaces. This report will look at the broad spectrum of this problem and provide some examples of security risks that the average citizen may face, as well as some solutions, mainly in the form of some already known algorithms. The report will also highlight some new problems that may arise in the online space.
+\keywords{MiniSat  \and \ac{SAT} \and logic.}
+\end{abstract}
 
 \newpage
-\normalsize{}
+%
+%
+%
+\section{Introduction}
 
-\chapter{Introduction}
+\ac{SAT} is a cornerstone in computational theory and practical applications, namely \ac{EDA}, artificial intelligence, and combinatorial optimization (see \cite{sat-solver}). Since 2003, MiniSat has continued to be a small, efficient, and readable \ac{SAT} solver, representing a perfect tool to introduce students and professionals alike to the nuances of \ac{SAT} solving (see \cite{minisat}).
 
-\section{Selected Titles and Authors}
-\begin{itemize}
+While MiniSat is often praised for its straightforward design, working with it as a beginner can present various challenges. For instance, setting up MiniSat, understanding its underlying algorithms, such as \ac{DPLL} and \ac{CDCL}, and configuring it for experimental benchmarks requires both theoretical and practical knowledge. In addition, interpreting MiniSat’s internal workings can be challenging, as it demands familiarity with conflict-driven clause learning, unit propagation, and constraint management, all of which are fundamental to modern \ac{SAT} solvers’ efficiency.
 
-\item Brij B. Gupta, Dharma P. Agrawal, Haoxiang Wang, \textit{Computer and cyber security: principles, algorithm, applications, and perspectives}. 
+In this report, we will explore these challenges from the perspective of newly introduced users. Our study includes the steps for installing MiniSat, configuring it to run benchmarks from the \ac{SAT} competition, and analyzing the results. We’ll also delve into the algorithms that power MiniSat, examining ways they could be enhanced. Throughout, we apply principles from software engineering, using \ac{UML} diagrams and detailed code documentation to bridge the gap between theoretical concepts and practical implementation. This report aims to provide a comprehensive overview for those new to SAT solvers, emphasizing the complexities and rewards of exploring this powerful problem-solving tool.
+ 
 
-\item DS Abd Elminaam, HM Abdual-Kader, MM Hadhoud  \textit{ANALYSIS AND DESIGN OF SYMMETRIC ENCRYPTION ALGORITHMS}.
+\subsection{Motivation}
 
-\end{itemize}
+Our motivation for studying MiniSat stems from its influential role in advancing \ac{SAT} solver technology and its accessibility as a learning tool. MiniSat has not only set a standard for efficiency in solving \ac{SAT} problems but also provides a straightforward and readable code that allows us to delve into its algorithms and structure. It represents a perfect starting line for our introduction into the world of \ac{SAT} solvers and their particularities, allowing us to understand key \ac{SAT}-solving techniques like \ac{DPLL} and \ac{CDCL} and explore potential improvements in these areas. By examining MiniSat’s contributions and considering modifications, we aim to gain a deeper appreciation of SAT solvers' impact on fields like AI, optimization, and verification.
 
-\section{Additional Resources}
+\newpage
 
-This paper will also look at other resources, mainly research papers, for a more in-depth look at this problem, those being:
+\section{SAT problem and solutions}
+\subsection{Problem description}
 
-\begin{itemize}
+The \ac{SAT} problem in propositional logic asks to determine in a given formula that combines atomic propositions using the Boolean operators "and" ($\land$), "or" ($\lor$), and "not" ($\neg$), whether there are truth values for the atoms in the formula such that the formula evaluates to true. Formally, \ac{SAT} is the challenge of determining if a logical formula, typically represented in \ac{CNF}, has at least one solution.
 
-\item Michael M. Losavio and Adel S. Elmaghraby, \textit{Cyber security challenges in Smart Cities: Safety, security, and privacy}. 
+While possible to be resolved by hand, after a certain number of atoms, the solution for such formulas becomes increasingly harder to be determined by ourselves alone, resulting in the need for such solvers to exist. This challenge has fueled the development of specialized \ac{SAT} solvers, which apply advanced algorithms to efficiently handle these vast and intricate formulas.
 
-\item
-Douglas Selent, \textit{ADVANCED ENCRYPTION STANDARD
-}.
+With \ac{SAT} solvers like MiniSat, which are designed specifically to tackle these computational hurdles, we reached a level where it is feasible to solve \ac{SAT} problems within a reasonable timeframe, even as formula complexity scales up. Because of its ease of modifiability, we will look in this paper at ways that we could improve the current code and compare our results with the original.
 
-\item
-Deris Stiawan, Abdul Hanan Abdullah, Mohd. Yazid Idris, \textit{Characterizing Network Intrusion Prevention System
-}.
+\subsection{MiniSat installation and first challenges}
 
-\item 
-DS Abd Elminaam, HM Abdual-Kader, MM Hadhoud  \textit{ANALYSIS AND DESIGN OF
-SYMMETRIC ENCRYPTION ALGORITHMS}.
+To begin using MiniSat on our Windows machines, we opted for the \ac{WSL} approach, which allows us to run a Linux environment natively on Windows without the need for virtual machines or terminals such as Cygwin. Below are the steps followed for the installation process:
 
-\item 
-Spyros Kokolakis, \textit{Privacy attitudes and privacy behavior: A review of current research on the privacy paradox phenomenon}.
+Here are the steps for installing \ac{WSL} and Ubuntu: To enable \ac{WSL}, we ran the command \begin{verbatim}wsl --install\end{verbatim} in PowerShell, running it as an Administrator. This command installs the required features and the default Linux distribution (Ubuntu) for \ac{WSL}. However, in some cases, users may encounter issues where the installation hangs or doesn't complete. To resolve this, it's necessary to ensure that Windows is fully updated and that the proper components for \ac{WSL} 2 are manually enabled. This can be done using PowerShell commands like \begin{verbatim}dism.exe\end{verbatim} to enable \ac{WSL} and Virtual Machine Platform features. After completing the steps, the \begin{verbatim}wsl --set-default-version 2 \end{verbatim}  command was run to ensure \ac{WSL} 2 was set as the default version.
 
-\item
-Alan F. Westin, \textit{Privacy And Freedom }.
+Installing MiniSat on Ubuntu: Once Ubuntu was installed from the Microsoft Store(not necessary, Ubuntu can also be installed from its home site as well, Microsoft Store was used for convenience) and set up with a username and password, the installation of MiniSat was straightforward. First, we updated the package list using the command: \begin{verbatim}sudo apt update\end{verbatim} Next, we installed the MiniSat solver by running: \begin{verbatim}sudo apt install minisat\end{verbatim}
 
-\item
-Siani Pearson, \textit{Privacy, Security and Trust in Cloud Computing}. 
+With MiniSat successfully installed, we can run the solver and evaluate its performance. To ensure that MiniSat is working properly, we can first test its basic functionality by running a sample input. To do this, we simply need to open the Ubuntu terminal and type the following command: \begin{verbatim}minisat\end{verbatim} This should display MiniSat’s usage instructions, confirming that the installation was indeed successful.
 
-\item
-Helen Nissenbaum, \textit{Privacy in Context Technology, Policy, and the Integrity of Social Life}.
-
-
-\end{itemize}
-
-\section{Motivation}
-
-The problem of cybersecurity is present in everyone's lives and combined with the emergence of new ways to violate people's privacy, I believe a good understanding of cybersecurity is important. The world of online security is fascinating, not only because it is a new problem that people have never faced before, but also because of the methods and algorithms that people use to protect their privacy and security.
-
-It is a sad truth that nowadays people can access private information about others with a single click. Whereas in the past we had to either befriend someone to find out what they like, where they are from, etc., today most people can access sensitive information with a simple click, meaning information such as where they live, where they work, where they go to school, their hobbies, relationship status, etc. can be viewed by almost anyone. And these are just superficial problems. Hackers can and will steal credit card information, precise locations, and personal data that is not just on a person's Facebook page, passwords, and accounts. Some figures put the damage caused by cybersecurity threats and hacks at 400 billion dollars worldwide, and in the future, those figures will rise to as much as 10.5 trillion dollars annually worldwide.
-
-To combat such problems, I think we have some options:
-
-1. We abandon the use of the Internet as a whole. This is the most extreme scenario, but I believe that for some people, disconnecting from the Internet altogether could actually prove beneficial in getting back in touch with nature and with themselves.
-
-2. We are developing countermeasures for such problems as the ones we will discuss in this paper, namely algorithms for cybersecurity. In addition to these algorithms, we will later discuss a possible solution in machine learning. Some examples of cybersecurity algorithms are (see \cite{Brij}):
-
-\begin{itemize}
-
-\item Symmetric encryption algorithms: Symmetric encryption methods such as Advanced Encryption Standard (AES), Data Encryption Standard (DES), and Triple DES (3DES) use a single key for both encryption and decryption.
-
-\item Asymmetric encryption algorithms: Asymmetric encryption techniques use two keys: a public key for encryption and a private key for decryption. These algorithms are also known as public-key cryptography. RSA, Diffie-Hellman, and Elliptic Curve Cryptography (ECC) are some examples.
-
-\item hash functions: These algorithms take an arbitrary size of input data and produce a fixed-size output (hash). They are commonly used for data integrity checks, digital signatures, and password storage. The hash algorithms MD5, SHA -1, SHA -256, and HMAC are widely used.
-
-\item Digital signature algorithms: guarantee the validity and integrity of digital messages and documents. They use the private key to create a unique signature that can be validated with the associated public key. Two examples are the Digital Signature Algorithm (DSA) and RSA-based signatures.
-
-\item Intrusion Detection Algorithms: To detect possible security breaches or malicious activity, these algorithms examine network traffic or system logs. They can use methods such as machine learning, data mining, or statistical analysis and can be rule-based or anomaly-based.
-
-\item Firewall Algorithms: To enforce network security standards and manage inbound and outbound network traffic, firewalls use a variety of algorithms. Access control lists (ACLs), stateful packet inspection (SPI), network address translation (NAT), and proxy servers are some of these algorithms.
-
-\item Intrusion Prevention Algorithms: Intrusion prevention systems (IPS) integrate intrusion detection and prevention functions by actively preventing or reducing detected threats. These algorithms use methods such as anomaly detection, behavioral analysis, and signature-based detection.
-
-\end{itemize}
-We will discuss in detail symmetric encryption algorithms and intrusion prevention algorithms.
-
-
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=400pt]{encryption-algorithms-what-is-cryptography-edureka.png}
-    \label{fig: Cybersecurity-Algorithms}
+\begin{figure}
+\centering
+\includegraphics[width=12cm, height=5.7cm]{fig.1.png}
+\caption{Successfully installation of MiniSat.} 
+\label{fig1}
 \end{figure}
 
+Next, to run a benchmark, we use test instances from recent SAT competitions. These competitions provide challenging SAT instances that can be used to evaluate the efficiency and performance of various solvers, including MiniSat.
 
-\chapter{Cybersecurity Concepts}
+To run a benchmark, we can follow these steps:
 
-Before we look at the various security algorithms, we must first discuss some basic concepts. From reading \cite{Brij}, we can derive the following basic concepts of cybersecurity:
+Firstly, we need to download the benchmark files, they are typically available from SAT competition websites, such as \url{https://satcompetition.github.io/2024/} or \url{https://benchmark-database.de/?track=main_2024}.
 
-Cybersecurity can be described as the inclusion and prevention of unauthorized access, damage, and theft of computer systems, networks, and data. Threats such as malware, hacking, and social engineering attempts are all covered. Access controls, encryption, firewalls, and patching are examples of security mechanisms. Risk management identifies vulnerabilities and develops incident-handling procedures. Security policies establish appropriate behavior and user privileges. Users are made aware of secure activities through security awareness. VPNs are used for device and network security. Audits and secure coding are part of application security. Security incident response plans include detection, mitigation, and recovery. Emerging cybersecurity technologies such as cloud security and AI are critical.
+Having downloaded a benchmark file (usually in .cnf format), we can use the following command to run MiniSat on it: \begin{verbatim}
+minisat <benchmark_file>.cnf result.txt
+\end{verbatim}
 
-Therefore, we can describe cybersecurity as a complex issue that requires a multi-layered strategy combining technical and human-centric approaches. Protecting digital assets, security, and privacy is a continuous process that requires constant monitoring, adaptability, and collaboration among the groups affected by these incidents.
-
-It is important to understand these fundamental concepts of cybersecurity, as they provide us with a starting point from which to enhance our privacy and protect ourselves and our loved ones from potential threats.
-
-In the next few chapters, we will look at some of the algorithms listed in Chapter 1, some basic concepts about them, their effectiveness, and other applications for security and privacy.
-
-\chapter{Algorithms}
-
-We will now examine some of the algorithms listed, as well as some other applications and areas where cybersecurity is important.
-
-\section{Symmetric Encryption Algorithms}
-
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=250pt]{Symmetric-Encryption.png}
-    \label{fig: Symmetric-Encryption-Algorithm}
+\begin{figure}
+\centering
+\includegraphics[width=12cm, height=5.7cm]{fig2.png}
+\caption{MiniSat benchmark.} 
+\label{fig2}
 \end{figure}
+\newpage
 
-From the work of DS Abd Elminaam (see \cite{DS}), some key points about protecting online and digital information can be derived, namely that protecting digital information usually involves two separate aspects: maintaining confidentiality to prevent unauthorized disclosure of information and ensuring authentication to verify that messages received are from the intended sender and haven't been tampered with during transmission.
+\begin{credits}
+\subsubsection{\ackname} 
 
-Symmetric cryptography uses a shared secret key to modify the message so that it cannot be retrieved without that key to ensure confidentiality. Symmetric encryption is the name given to this conversion process. Depending on how they handle the message, ciphers, i.e. algorithms for symmetric encryption, can be divided into two main groups: Block ciphers and stream ciphers.
+\subsubsection{\discintname}
 
-Again (see \cite{DS}), we can deduce that an encryption algorithm is designed with the goal of ensuring the confidentiality of messages transmitted over an insecure channel. \cite{DS} also tells us that an ordinary encryption algorithm consists of two mathematical operations: an encryption function (E) and a corresponding decryption function (D = E(-1)). The sender (sometimes referred to as Alice) encrypts the original message P (plaintext) before converting it to an encrypted text C = E(P) and sending it over the insecure channel to ensure secure communication. The intended recipient (Bob) determines D(C) = P after receiving C and recovering the plaintext.
+\end{credits}
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+% \bibliographystyle{splncs04}
+% \bibliography{mybibliography}
+%
+\newpage
+{\noindent \huge \listoffigures \par}
+{\noindent \huge \textbf{List of acronyms}\par}
 
-An important conclusion that \cite{DS} draws is that linear cryptanalysis, a technique used in the study of cryptography to study and decrypt block ciphers and other cryptographic algorithms, is an important and valuable analysis technique in the field of symmetric cryptography. The main point of cryptanalysis and the reason why it's so important is that it helps to identify vulnerabilities, evaluate the security of algorithms, and guide the design and evolution of algorithms. It increases the overall performance of algorithms, enables the potential recovery of secret keys, and ensures a higher level of security.
+\begin{acronym}
+ \acro{SAT}{Boolean satisfiability problem}
+ \acro{e.g.}{example}
+ \acro{NP-complete}{Nondeterministic Polynomial-Time complete}
+ \acro{EDA}{electronic design automation}
+ \acro{DPLL}{Davis Putnam Logemann Loveland}
+ \acro{CDCL}{conflict-driven clause learning}
+ \acro{UML}{Unified Modeling Language}
+ \acro{CNF}{Conjunctive Normal Form}
+  \acro{WSL}{Windows Subsystem for Linux}
+\end{acronym}
+\begin{thebibliography}{8}
+\bibitem{sat-solver}
+Authors: Niklas Een, Niklas Sorensson; Institute: Chalmers University of Technology, Sweden; Paper title: An Extensible SAT-solver[extended version 1.2]
 
-One algorithm that stood out to me among the group of symmetric algorithms was AES (Advanced Encryption Standard), which \cite{DS} calls "the most well-known block cipher based on an SP network." For more information about AES and an example of its implementation, I recommend reading \cite{Douglas}, as his article describes both the history and the operation of the algorithm in more detail.
-
-\section{Intrusion Prevention Algorithms}
-
-\begin{figure}[htp]
-    \centering
-    \includegraphics[width=300pt]{HIDS.png}
-    \label{fig: Intrusion-Prevention-Algorithms}
-\end{figure}
-
-Another set of algorithms for security is intrusion prevention. According to \cite{Deris}, an IPS (Intrusion Prevention Algorithm) can be described as a real-time product designed to detect and stop malicious network activity. IPS provides a proactive strategy for network defense by combining the methods of firewalls (which operate at multiple levels such as data link, network, transport, and application) and intrusion detection systems (IDS). To prevent attacks on the network, records, and behavior patterns are checked using pattern recognition sensors. The IPS blocks malicious data as soon as an attack is detected and logs relevant data for further investigation.
-
-There are several approaches to this algorithm, namely:
-
-\begin{itemize}
-
-\item signature-based detection: this method compares network traffic patterns or other data against a database of recognized attack signatures. If a match is found, the IPS intervenes to stop or mitigate the attack.
-
-\item Monitoring network behavior and comparing it to typical or expected patterns are called anomaly-based detection. Any deviation from the usual is considered a potential attack and the necessary action is taken.
-
-\item Heuristics-based detection: in heuristics-based detection, predetermined rules and algorithms are used to detect irregular patterns or actions that could be signs of an attack. Based on these characteristics, IPS is able to detect new or undetected attacks.
-
-\item Traffic Analysis: to find malicious patterns, strange data streams, or suspicious activities, IPS performs deep packet inspection and analyzes network traffic. Based on network protocols, traffic volumes, and other traffic-related factors, attacks can be detected and stopped.
-
-\item Proactive Defense: Using methods such as packet filtering, protocol validation, rate limiting, and session termination, IPS can actively defend against attacks. Attacks must be stopped or mitigated by preventive measures before they can do any damage.
-
-\end{itemize}
-
-In short, an IPS helps maintain an overall secure and private network environment by detecting and stopping attacks, reducing vulnerabilities, enforcing privacy laws, and providing proactive incident response. It improves the overall security posture and helps protect confidential data from unauthorized access or disclosure.
-
-These algorithms play a critical role in ensuring security and privacy in our network environments. They prevent threats, mitigate vulnerabilities, enforce privacy policies, and enable proactive incident response.
-
-The applications of these algorithms are deeply rooted in our online lives, from privacy to social security. In the following chapter, we will look at these applications, how privacy relates to our freedom, and how this security is being challenged in today's society.
-
-We will also focus on future problems and possible solutions, and how we might be affected by these new challenges.
-
-\chapter{Cybersecurity and social life}
-
-We have already discussed some reasons why cybersecurity is very important to our social life. From strangers being able to learn a lot about a person by looking at their social profiles (as a quick side note, there are ways to keep your account private, but the vast majority of people leave their accounts public so that anyone can see their profile), to hackers getting into a person's computer and stealing all of their data, I think privacy has taken a bit of a back seat these days like it used to. We could also discuss other ways that companies or the government invade our privacy without us knowing about it, such as how companies like Google can register what a user likes and then show them ads for products that fall into our area of interest (it's not that important, but many people do not realize that, and companies like Google store a whole lot of information about their users).
-
-A big concern people have is how cybersecurity can impact our freedom and how it can help us in our future society, such as how cybersecurity will be implemented in smart cities from now on.
-
-\section{Our approach to privacy online}
-
-It would be unfair to not take into consideration the advancements that were made in the field of cybersecurity and to have at all times a judgemental and doubtful outlook on the current situation of online privacy. However, there is always a risk that something will go wrong, be it a human error, or a successful breach in our firewalls. So, how should one approach this behemoth of an undertaking, it can always feel daunting and disheartening to not know what to do in regard to our safety and well-being. A solution in my opinion is a fundamental change in how we approach what we do online. 
-
-There are many ways to reduce the possibility of a privacy breach, for example by using a VPN, or when searching for something, using Incognito Mode. Such examples work well enough, but there are also possible attacks that seem inoffensive at first. As an example, nowadays people can fall prey easily to fake emails forwarded by their "boss" and corrupt their entire organization. Other such events can happen to someone at home or when someone accesses a shady site that he wasn't sure if it was dangerous to enter.
-
-Overall the approach that we have to our online privacy can determine how much will be lost and how we will manage to keep ourselves safe.
-
-\section{Surveillance and smart cities}
-
-The following section was inspired by \cite{Alan} and \cite{Michael}. 
-
-We will discuss a less known issue, but I think one that will become more and more serious in the online space, and that is the problem of surveillance. Although beneficial in combating crime, surveillance could pose a problem if it's made public. For example, there are many cities that have public cameras which anyone can enter and watch live feeds. Not only that but there is a small probability that in cities with more cameras, someone might access them and watch what happens at all times. Now everyone's daily routine can be watched by someone without them knowing, the dangers of it becoming more apparent the more we look into it. I don't think that surveillance cameras are bad, but we can't overlook the new dangers to our privacy and safety.
-
-Other issues that our new, smart cities face include the automation of certain services. Take for example a simple ATM, people used certain tricks with the help of ATMs to steal from people their credit card information. Other problems for our privacy could include police drones or the digitization of services that could lead to scams.
-
-\section{Machine learning as a solution}
-
-The last point that we will focus on is the question of tomorrow. What will happen in the next 50 years? Will we again, get access to new technologies as the people born in the '70s, during the '2000s had to face a problem never before seen, keeping their privacy safe not only from the physical life, but also the online one? There are many such problems that I think will arrive in the future in regard to our privacy. Take for example how today by giving simple instructions, anyone can make a realistic human by using AI, that sometimes looks indistinguishable from a real one. Not only that but AI deep fake voices have begun to also make a big appearance, which in my opinion can create even more problems. Take for example someone that makes a false testimony while using someone's voice without their consent. How will future cybersecurity detect if the voice recording/ video shown is real or fake? This is I feel a problem that the next generations will have to deal with, as we had with the problems that arrived with the birth of the internet.
-
-The silver lining in all of this could be from machine learning. We could develop in the future AIs that could detect if an image, video, or voice recording is generated or not, either by searching for artifacts in the making of the video, searching for any subtle differences in the voice of a recording, or looking for references that an AI might have used to create the fake images. These problems are just now starting to make their appearance, so new solutions need to be implemented fast.
-
-\chapter{Conclusion, Related work}
-
-\section{Related work}
-
-Some other reads that I recommend are \cite{Spyros} which delves more into a not so cybersecurity focused thought experiment, reviewing if people really care about their privacy and showcasing more abstract ways of thinking, and the other related work that I found interesting includes privacy and trust in Cloud Computing(see \cite{Siani}),
-
-\section{Conclusions}
-
-I feel deep appreciation for today's world and the systems that we are using right now, but I do feel that as time goes on unfortunately, our privacy and security might get more and more difficult to keep in the evolving state of the internet. For current problems, I do still feel that the current countermeasures are good enough(for example the algorithms discussed), but as mentioned previously, the future could bring some not-so-desirable side effects again.
-
-
-\begin{thebibliography}{7}
-
-\bibitem{DS} 
-DS Abd Elminaam, HM Abdual-Kader, MM Hadhoud  \textit{ANALYSIS AND DESIGN OF
-SYMMETRIC ENCRYPTION ALGORITHMS}.
-
-\bibitem {Brij}
-Brij B. Gupta, Dharma P. Agrawal, Haoxiang Wang, \textit{Computer and cyber security: principles, algorithm, applications, and perspectives}. 
-
-\bibitem {Michael}
-Michael M. Losavio and Adel S. Elmaghraby, \textit{Cyber security challenges in Smart Cities: Safety, security, and privacy}. 
-
-\bibitem {Spyros}
-Spyros Kokolakis, \textit{Privacy attitudes and privacy behavior: A review of current research on the privacy paradox phenomenon}.
-
-\bibitem {Siani}
-Siani Pearson, \textit{Privacy, Security and Trust in Cloud Computing}. 
-
-\bibitem {Helen}
-Helen Nissenbaum, \textit{Privacy in Context Technology, Policy, and the Integrity of Social Life}.
-
-\bibitem {NZ}
-NZ Jhanjhi, Mamoona Humayun2, and Saleh N. Almuayqil, \textit{Cyber Security and Privacy Issues in Industrial Internet of Things}.
-
-\bibitem{Alan}
-Alan F. Westin, \textit{Privacy And Freedom }.
-
-\bibitem{Douglas}
-Douglas Selent, \textit{ADVANCED ENCRYPTION STANDARD
-}.
-
-\bibitem{Deris}
-Deris Stiawan, Abdul Hanan Abdullah, Mohd. Yazid Idris, \textit{Characterizing Network Intrusion Prevention System
-}.
-
-
+\bibitem{minisat}
+MiniSat documentation, \url{http://minisat.se/Main.html}
 
 \end{thebibliography}
-
 \end{document}
