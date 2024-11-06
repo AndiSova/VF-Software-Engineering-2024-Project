@@ -92,29 +92,19 @@ Installing MiniSat on Ubuntu: Once Ubuntu was installed from the Microsoft Store
 
 With MiniSat successfully installed, we can run the solver and evaluate its performance. To ensure that MiniSat is working properly, we can first test its basic functionality by running a sample input. To do this, we simply need to open the Ubuntu terminal and type the following command: \begin{verbatim}minisat\end{verbatim} This should display MiniSat’s usage instructions, confirming that the installation was indeed successful.
 
-\begin{figure}
-\centering
-\includegraphics[width=12cm, height=5.7cm]{fig.1.png}
-\caption{Successfully installation of MiniSat.} 
-\label{fig1}
-\end{figure}
-
 Next, to run a benchmark, we use test instances from recent SAT competitions. These competitions provide challenging SAT instances that can be used to evaluate the efficiency and performance of various solvers, including MiniSat.
 
 To run a benchmark, we can follow these steps:
 
-Firstly, we need to download the benchmark files, they are typically available from SAT competition websites, such as \url{https://satcompetition.github.io/2024/} or \url{https://benchmark-database.de/?track=main_2024}.
+The download process of the files is in itself its challenge however. For example, if we choose \url{https://benchmark-database.de/?track=main_2024} as the place where  we want to download our benchmark files, we need to do the following:
 
-Having downloaded a benchmark file (usually in .cnf format), we can use the following command to run MiniSat on it: \begin{verbatim}
+• On the first page, we see several rows with a hash code on them. We need to select one of the hash codes to download the file in .cnf format.
+
+• Within it there are multiple files. We aim to find a file with fewer characters to ensure faster execution(since this is our first test we aim for a fast result). We unzip the files and open them with a text editor to determine the smallest file.
+
+• Having downloaded a benchmark file (usually in .cnf format), we can use the following command to run MiniSat on it: \begin{verbatim}
 minisat <benchmark_file>.cnf result.txt
 \end{verbatim}
-
-\begin{figure}
-\centering
-\includegraphics[width=12cm, height=5.7cm]{fig2.png}
-\caption{MiniSat benchmark.} 
-\label{fig2}
-\end{figure}
 
 Some challenges can arise from installing MiniSat, however, besides having troubles with installing Ubuntu. Mainly, we found that installing MiniSat using other means, for example using Cygwin, or installing it using a Virtual Machine can include unforeseen problems, which the installation using \ac{WSL} can prevent. Virtual Machines do not use the full power of the system, which is desirable when running benchmarks, and Cygwin provides a harder and more complex installation process than using PowerShell and Ubuntu.
 
@@ -136,7 +126,6 @@ Some challenges can arise from installing MiniSat, however, besides having troub
 % \bibliography{mybibliography}
 %
 \newpage
-{\noindent \huge \listoffigures \par}
 
 {\noindent \huge \textbf{List of acronyms}\par}
 
