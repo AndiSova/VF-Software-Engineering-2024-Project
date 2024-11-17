@@ -1,121 +1,455 @@
-% This is samplepaper.tex, a sample chapter demonstrating the
-% LLNCS macro package for Springer Computer Science proceedings;
-% Version 2.21 of 2022/01/12
-%
 \documentclass[runningheads]{llncs}
-%
+
 \usepackage[T1]{fontenc}
-% T1 fonts will be used to generate the final print and online PDFs,
-% so please use T1 fonts in your manuscript whenever possible.
-% Other font encondings may result in incorrect characters.
-%
 \usepackage{graphicx}
+\graphicspath{ {figures/} }
+\usepackage{array}
 \usepackage{hyperref} 
 \usepackage{amsmath}
 \usepackage{mathabx}
+\usepackage{multirow}
 \usepackage[printonlyused,withpage]{acronym}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage{xcolor}
 
-% Used for displaying a sample figure. If possible, figure files should
-% be included in EPS format.
-%
-% If you use the hyperref package, please uncomment the following two lines
-% to display URLs in blue roman font according to Springer's eBook style:
-%\usepackage{color}
-%\renewcommand\UrlFont{\color{blue}\rmfamily}
-%\urlstyle{rm}
-%
+\setcounter{tocdepth}{3}
+
+\makeatletter
+\renewcommand\maketitle{
+  \begin{center}
+    {\LARGE\bfseries \@title \par}
+    \vskip 1em
+    {\small\lineskip .5em%
+     \begin{tabular}[t]{c}\@author
+     \end{tabular}\par}
+    \vskip 1em
+    {\footnotesize\@institute\par}
+  \end{center}%
+}
+\makeatother
+
+
 \begin{document}
-%
-\title{MiniSat Report}
-%
-%\titlerunning{Abbreviated paper title}
-% If the paper title is too long for the running head, you can set
-% an abbreviated paper title here
-%
-\author{Șova Dumitru Ștefan Andrei \href{dumitru.sova01@e-uvt.ro}{dumitru.sova01@e-uvt.ro} \\
-   \and Andries Rafael Gabriel \href{mailto:rafael.andries00@e-uvt.ro}{rafael.andries00@e-uvt.ro} \\
-   \and Stoentel Alexandru-Eduard \href{mailto:alexandru.stoentel01@e-uvt.ro}{alexandru.stoentel01@e-uvt.ro} \\
-   \and Nenescu Eugeniu \href{mailto:eugeniu.nenescu00@e-uvt.ro}{eugeniu.nenescu00@e-uvt.ro} }
-%
+
+\title{Satisfiability Problem with MiniSat - Benchmarks, Comprehension and Challenges}
+
+\author{Șova Dumitru Ștefan Andrei, \email{dumitru.sova01@e-uvt.ro} 
+\and Andries Rafael Gabriel, \email{rafael.andries00@e-uvt.ro} 
+\and Stoentel Alexandru-Eduard, \email{alexandru.stoentel01@e-uvt.ro} 
+\and Nenescu Eugeniu \email{eugeniu.nenescu00@e-uvt.ro}}
+
 \authorrunning{F. Author et al.}
-% First names are abbreviated in the running head.
-% If there are more than two authors, 'et al.' is used.
-%
+
 \institute{West University of Timișoara, Bulevardul Vasile Pârvan 4, Timișoara 300223}
-%
-\maketitle              % typeset the header of the contribution
-%
+
+\addtocontents{toc}{\protect\setcounter{tocdepth}{0}}
+
+\maketitle 
+\addtocontents{toc}{\protect\setcounter{tocdepth}{3}}
+
 \begin{abstract}
 
-Since time immemorial, logic has helped us make sense of the world that surrounds us, from our ancestors' philosophical inquiries to its use in modern mathematics and informatics. Logic bridges the gap between formal and informal knowledge, proving essential in fields as diverse as databases, programming languages (\ac{e.g.}, Prolog), and propositional logic. This paper focuses on a compelling area within informatics: the \ac{SAT}, a foundational challenge in computational complexity. \ac{SAT} asks whether a set of variable assignments can satisfy a Boolean formula and stands as the first problem proven to be \ac{NP-complete}. Our main focus will be on MiniSat, an \ac{SAT} solver designed to address this challenge efficiently. Finally, such solvers enabled tackling practical problems with millions of variables, benefiting research and industry.
+For as long as we have been alive, logic has helped us make sense of the world surrounding us, from our philosophical inquiries to its use in modern mathematics and informatics. Logic bridges the gap between formal and informal knowledge, proving essential in databases, programming languages (\ac{e.g}, Prolog), and propositional logic. This paper focuses on a compelling area within informatics: the \ac{SAT}. Our main focus will be on MiniSat, a \ac{SAT} solver designed to efficiently address the challenge of satisfiability. Such solvers can tackle problems with millions of variables, benefiting research and industry.
 
-This report includes benchmarks from recent \ac{SAT} competitions, alongside minor modifications to MiniSat’s original code, to compare results and evaluate its performance across different problem instances. With time results and outputs available on GitHub, this analysis highlights MiniSat’s capabilities and underscores the broader impact of \ac{SAT} solvers in advancing computational problem-solving. GitHub link for the project: \url{https://github.com/AndiSova/VF-Software-Engineering-2024-Project}
+This report will include the installation process for MiniSat, initial challenges faced with working with MiniSat, benchmarks from recent \ac{SAT} competitions, mainly the Hamiltonian family of tests, a look into the algorithms found in the code of MiniSat, and suggestions on how the code might be modified to improve runtimes. Our analysis will highlight MiniSat’s capabilities, while the code and benchmarks can be found in the following GitHub link: 
 
-\keywords{MiniSat  \and \ac{SAT} \and logic.}
+\url{https://github.com/AndiSova/VF-Software-Engineering-2024-Project}
+
+\keywords{MiniSat  \and \ac{SAT} \and algorithms.}
 \end{abstract}
 
+\lstset{
+    frame=none,
+    language=C++,
+    numbers=none,
+    tabsize=4,
+    showstringspaces=false,
+    basicstyle=\ttfamily,
+    keywordstyle=\color{violet},
+    commentstyle=\color{green},
+    morekeywords={Vec, Constr, Solver, NULL, true, false}
+}
+
 \newpage
-%
-%
-%
-\section{Introduction}
+\tableofcontents
+\listoftables
+%\listoffigures
+{\noindent \large \textbf{List of acronyms}\par}
+
+\begin{acronym}
+ \acro{SAT}{Boolean satisfiability problem}
+ \acro{e.g.}{example}
+ \acro{NP-complete}{Nondeterministic Polynomial-Time complete}
+ \acro{EDA}{electronic design automation}
+ \acro{DPLL}{Davis Putnam Logemann Loveland}
+ \acro{CDCL}{Conflict-Driven Clause Learning}
+ \acro{UML}{Unified Modeling Language}
+ \acro{CNF}{Conjunctive Normal Form}
+ \acro{WSL}{Windows Subsystem for Linux}
+ \acro{OS}{Operating System}
+\end{acronym}
+\newpage
+
+\section{Introduction}\label{cap:intro}
 
 \ac{SAT} is a cornerstone in computational theory and practical applications, namely \ac{EDA}, artificial intelligence, and combinatorial optimization (see \cite{sat-solver}). Since 2003, MiniSat has continued to be a small, efficient, and readable \ac{SAT} solver, representing a perfect tool to introduce students and professionals alike to the nuances of \ac{SAT} solving (see \cite{minisat}).
 
-While MiniSat is often praised for its straightforward design, working with it as a beginner can present various challenges. For instance, setting up MiniSat, understanding its underlying algorithms, such as \ac{DPLL} and \ac{CDCL}, and configuring it for experimental benchmarks requires both theoretical and practical knowledge. In addition, interpreting MiniSat’s internal workings can be challenging, as it demands familiarity with conflict-driven clause learning, unit propagation, and constraint management, all of which are fundamental to modern \ac{SAT} solvers’ efficiency.
+While MiniSat is often praised for its straightforward design, working with it as a beginner can present various challenges. For example, setting up MiniSat, understanding its algorithms, such as \ac{DPLL} and \ac{CDCL}, and running your first benchmark might challenge the uninitiated.
 
-In this report, we will explore these challenges from the perspective of newly introduced users. Our study includes the steps for installing MiniSat, configuring it to run benchmarks from the \ac{SAT} competition, and analyzing the results. We’ll also delve into the algorithms that power MiniSat, examining ways they could be enhanced. Throughout, we apply principles from software engineering, using \ac{UML} diagrams and detailed code documentation to bridge the gap between theoretical concepts and practical implementation. This report aims to provide a comprehensive overview for those new to SAT solvers, emphasizing the complexities and rewards of exploring this powerful problem-solving tool.
- 
+In this report, we will explore these challenges from the perspective of newly introduced users. Our study includes the steps for installing MiniSat, the steps required to run a test from the 2024 \ac{SAT} competition, an analysis of MiniSats' main algorithms, possible improvements that can be made for the source code, and the results from running a family of tests using the original code. 
 
-\subsection{Motivation}
+For a better understanding of the main components of MiniSat, we will apply principles from software engineering, making use of \ac{UML} diagrams and detailing the code, using pseudocode, in an attempt to bridge the gap between theoretical concepts and practical implementation.
 
-Our motivation for studying MiniSat stems from its influential role in advancing \ac{SAT} solver technology and its accessibility as a learning tool. MiniSat has not only set a standard for efficiency in solving \ac{SAT} problems but also provides a straightforward and readable code that allows us to delve into its algorithms and structure. It represents a perfect starting line for our introduction into the world of \ac{SAT} solvers and their particularities, allowing us to understand key \ac{SAT}-solving techniques like \ac{DPLL} and \ac{CDCL} and explore potential improvements in these areas. By examining MiniSat’s contributions and considering modifications, we aim to gain a deeper appreciation of SAT solvers' impact on fields like AI, optimization, and verification.
+\subsection{Motivation}\label{sect:Motivation}
+
+Our main motivation for studying MiniSat stems from its influential role in advancing \ac{SAT} solver technology and its accessibility as a learning tool. Since 2003, MiniSat has set a standard for efficiency in solving \ac{SAT} problems, providing a straightforward and readable code that allows us to delve into its algorithms and structure. 
+
+It represents a perfect starting line for our introduction into the world of \ac{SAT} solvers and their particularities, showcasing powerful algorithms, such as \ac{DPLL} and \ac{CDCL}, while also allowing us to explore potential improvements for the current code.
+
+\subsection{Scope and Objectives}\label{sect:Scope and Objectives}
+
+With its ease of use in mind, without prior knowledge, the use and understanding of MiniSat might seem harder than it is. As such, our main aim for this paper will be to showcase how one can use MiniSat, as a first-time user, how to run a benchmark for the first time, how to understand the code that MiniSat runs on, and to start a discussion on how the code could be improved in the future.
 
 \newpage
 
-\section{SAT problem and solutions}
-\subsection{Problem description}
+\section{SAT problem and solutions}\label{cap:SAT problem and solutions}
+\subsection{Problem description}\label{sect:Problem Description}
 
-The \ac{SAT} problem in propositional logic asks to determine in a given formula that combines atomic propositions using the Boolean operators "and" ($\land$), "or" ($\lor$), and "not" ($\neg$), whether there are truth values for the atoms in the formula such that the formula evaluates to true. Formally, \ac{SAT} is the challenge of determining if a logical formula, typically represented in \ac{CNF}, has at least one solution.
+The \ac{SAT} problem in propositional logic asks to determine in a given formula that combines atomic propositions using the Boolean operators "and" ($\land$), "or" ($\lor$), and "not" ($\neg$), whether there are truth values for the atoms in the formula such that the formula evaluates to true\cite{SAT}. In summary, the \ac{SAT} problem is the challenge of determining if a logical formula, typically represented in \ac{CNF}, has at least one solution.
 
-While possible to be resolved by hand, after a certain number of atoms, the solution for such formulas becomes increasingly harder to be determined by ourselves alone, resulting in the need for such solvers to exist. This challenge has fueled the development of specialized \ac{SAT} solvers, which apply advanced algorithms to efficiently handle these vast and intricate formulas.
+While it is possible to be resolved by hand, after a certain number of atoms, the solution for such formulas becomes increasingly harder to be determined by ourselves alone, resulting in the need for solvers similar to MiniSat to exist. This exponential increase in difficulty for solving complex formulas has fueled the development of \ac{SAT} solvers, which apply advanced algorithms to handle these formulas efficiently.
 
-With \ac{SAT} solvers like MiniSat, which are designed specifically to tackle these computational hurdles, we reached a level where it is feasible to solve \ac{SAT} problems within a reasonable timeframe, even as formula complexity scales up. Because of its ease of modifiability, we will look in this paper at ways that we could improve the current code and compare our results with the original.
+With \ac{SAT} solvers like MiniSat, designed specifically to tackle these computational hurdles, we reached a level where it is possible to solve these problems within a reasonable time slot.
 
-\subsection{MiniSat installation and first challenges}
+\subsection{MiniSat installation and first challenges}\label{cap:MiniSat installation and first challenges}
 
-To begin using MiniSat on our Windows machines, we opted for the \ac{WSL} approach, which allows us to run a Linux environment natively on Windows without the need for virtual machines or terminals such as Cygwin. Below are the steps followed for the installation process:
+Since the installation process for MiniSat on the Windows \ac{OS} is not the most straightforward, this paper will showcase how a new user can install the solver on their machine with the following instructions:
 
-Here are the steps for installing \ac{WSL} and Ubuntu: To enable \ac{WSL}, we ran the command \begin{verbatim}wsl --install\end{verbatim} in PowerShell, running it as an Administrator. This command installs the required features and the default Linux distribution (Ubuntu) for \ac{WSL}. However, in some cases, users may encounter issues where the installation hangs or doesn't complete. To resolve this, it's necessary to ensure that Windows is fully updated and that the proper components for \ac{WSL} 2 are manually enabled. This can be done using PowerShell commands like \begin{verbatim}dism.exe\end{verbatim} to enable \ac{WSL} and Virtual Machine Platform features. After completing the steps, the \begin{verbatim}wsl --set-default-version 2 \end{verbatim}  command was run to ensure \ac{WSL} 2 was set as the default version.
+To begin using the solver, we will go for the \ac{WSL} approach, which allows us to run a Linux environment natively on Windows without the need for virtual machines or terminals such as Cygwin. Below are the steps followed for the installation process:
 
-Installing MiniSat on Ubuntu: Once Ubuntu was installed from the Microsoft Store(not necessary, Ubuntu can also be installed from its home site as well, Microsoft Store was used for convenience) and set up with a username and password, the installation of MiniSat was straightforward. First, we updated the package list using the command: \begin{verbatim}sudo apt update\end{verbatim} Next, we installed the MiniSat solver by running: \begin{verbatim}sudo apt install minisat\end{verbatim}
+Firstly, \ac{WSL} needs to be enabled, to do this, the following command is required to be run in PowerShell(mandatory, Powershell needs to be run as an Administrator):
+\begin{verbatim}wsl --install\end{verbatim}
 
-With MiniSat successfully installed, we can run the solver and evaluate its performance. To ensure that MiniSat is working properly, we can first test its basic functionality by running a sample input. To do this, we simply need to open the Ubuntu terminal and type the following command: \begin{verbatim}minisat\end{verbatim} This should display MiniSat’s usage instructions, confirming that the installation was indeed successful.
+This command installs the required features and the default Linux distribution (Ubuntu) system for \ac{WSL}. However, in some cases, users may encounter issues where the installation hangs or doesn't complete. To resolve this, it's necessary to ensure that Windows is fully updated and that the proper components for \ac{WSL} 1(or version 2 if the user chooses so) are manually enabled. This can be done again in PowerShell(running in Administrator mode) using the following commands: 
+\begin{verbatim}dism.exe\end{verbatim} 
+This command was used to enable Virtual Machine Platform features. After successfully running it, the following command needs to be run to ensure \ac{WSL} 1 is set as the default version.
+\begin{verbatim}wsl --set-default-version 1 \end{verbatim}  
 
-Next, to run a benchmark, we use test instances from recent SAT competitions. These competitions provide challenging SAT instances that can be used to evaluate the efficiency and performance of various solvers, including MiniSat.
+In the possibility that neither command works, another possible solution would be to manually install the following update for Windows, wsl$\_$update$\_$x64, which allows Linux environments to run directly on Windows.
+
+After enabling \ac{WSL}, we need to install Ubuntu, a Linux-based \ac{OS}. To do this, Ubuntu can be installed from the Microsoft Store or its home site(for this paper, version 22.04 of Ubuntu was chosen). To complete the installation process, a username and password need to be set up by the user. It is highly recommended to update Ubuntu after we are done with the setup process. We will use the following command to do so: \begin{verbatim}sudo apt update\end{verbatim}
+
+Installing MiniSat on Ubuntu: First, we will install the MiniSat solver by running: \begin{verbatim}sudo apt install minisat\end{verbatim}
+
+\subsection{First benchmark}\label{First benchmark}
+With MiniSat successfully installed, we can run the solver and evaluate its performance. To ensure that MiniSat is working properly, we can first test its basic functionality by running a sample input. To do this, we need to open the Ubuntu terminal and type the following command: \begin{verbatim}minisat\end{verbatim} This should display MiniSat’s usage instructions, confirming that the installation was indeed successful.
+
+Next, to run a benchmark, we use test instances from recent SAT competitions. These competitions provide SAT instances that can be used to evaluate the efficiency and performance of various solvers, including MiniSat.
 
 To run a benchmark, we can follow these steps:
 
-The download process of the files is in itself its challenge however. For example, if we choose \url{https://benchmark-database.de/?track=main_2024} as the place where  we want to download our benchmark files, we need to do the following:
+- We will use the following link to download our tests: 
 
-• On the first page, we see several rows with a hash code on them. We need to select one of the hash codes to download the file in .cnf format.
+\url{https://benchmark-database.de/?track=main_2024}. 
 
-• Within it there are multiple files. We aim to find a file with fewer characters to ensure faster execution(since this is our first test we aim for a fast result). We unzip the files and open them with a text editor to determine the smallest file.
+- On the first page, we see several rows, each with a hash code on them. We need to select one of the hash codes to download the file in .cnf format.
 
-• Having downloaded a benchmark file (usually in .cnf format), we can use the following command to run MiniSat on it: \begin{verbatim}
-minisat <benchmark_file>.cnf result.txt
-\end{verbatim}
+- If we wish to search a specific family of tests, on the top of the page there is a 'Query for instances' search bar. Here, we can write a query to receive only the tests we are interested in. For example, if we wish to fetch only the tests from the 2024 competition of the Hamiltonian family, we need to run: 
+\begin{verbatim}track=main_2024 and family like Hamiltonian\end{verbatim}
 
-Some challenges can arise from installing MiniSat, however, besides having troubles with installing Ubuntu. Mainly, we found that installing MiniSat using other means, for example using Cygwin, or installing it using a Virtual Machine can include unforeseen problems, which the installation using \ac{WSL} can prevent. Virtual Machines do not use the full power of the system, which is desirable when running benchmarks, and Cygwin provides a harder and more complex installation process than using PowerShell and Ubuntu.
+- After choosing which test we wish to download, we need to click on the hash code from the test and a download process will start. The file downloaded is a .zip file, which we need to unzip, in it we can find the .cnf file that we need.
+
+- Having downloaded the test file, we need to place it inside our Ubuntu folder first. To find it, in File Explorer, in the file search bar, we can type \begin{verbatim}\\wsl.localhost\Ubuntu-22.04\home\username\end{verbatim} to easily access it. 
+
+- After placing the file in the correct folder, we can use the following command to have MiniSat try and solve it: 
+\begin{verbatim}minisat <benchmark_file>.cnf output.stats > output.out\end{verbatim}
+
+This command will create 2 files in the folder where we placed our test file, a .stats file where we can see the total runtime, whether the formula is satisfiable or unsatisfiable, and the memory used, and a .out file where the results are shown, showcasing as well which literals are true and which are false.
+
+As seen, some challenges might arise from installing MiniSat, as such, we looked into installing MiniSat using different means, for example by using Cygwin, and by installing it using a Virtual Machine. However, we observed that installing it using \ac{WSL} can prevent certain problems. Virtual Machines do not use the system's full power, which is desirable when running benchmarks. Cygwin provides a harder and more complex installation process than PowerShell and Ubuntu.
+
+\section{Code Documentation}\label{cap:Code Documentation}
+
+To better understand the MiniSat solver, we will delve into some of its most important algorithms, namely, the \ac{CDCL} and \ac{DPLL} algorithms. We will also look in this section at possible ways in which we could improve the current code in the future.
+
+The following diagram showcases the main use cases of MiniSats' code:
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.67\linewidth]{usecase.png}
+    \caption{Use Case Diagram}
+    \label{fig: Use Case Diagram}
+\end{figure}
+
+\subsection{Algorithm structures}\label{Algorithm structures}
+
+The \ac{DPLL} algorithm is a method used to solve Boolean satisfiability problems (SAT). In simpler terms, it’s a systematic way to figure out whether there’s a way to assign true or false values to a set of variables so that a logical formula becomes true \cite{DPLL}.
+
+The \ac{CDCL} algorithm is an advanced method used to solve Boolean satisfiability problems (SAT). It builds on the basic ideas of the \ac{DPLL} algorithm but introduces several powerful techniques to solve problems faster and handle more complex cases \cite{CDCL}.
+
+Now we'll go by each file in the MiniSat code and see where and how these 2 algorithms are used. The code can be found on the project GitHub link, here: \url{https://github.com/AndiSova/VF-Software-Engineering-2024-Project/tree/main/minisat}
+
+In the main.cc file, in the core folder, both algorithms are used, we'll first talk about the \ac{CDCL} algorithm. The Solver class serves as the primary implementation of the algorithm while the solverLimited() method is the core of it handling tasks like conflict analysis, decision making, and propagation.
+The Lit data structure is utilized to represent Boolean variables and their negations while the interrupt() method allows the solver to be halted a common feature in \ac{CDCL} solvers.
+
+Now we'll move on to the \ac{DPLL} algorithm in the same file.
+The simplify() method carries out unit propagation and pure literal elimination, both fundamental components of the \ac{DPLL} algorithm.
+DIMACS format parsing is implemented, allowing the solver to handle the standard input format commonly used by \ac{SAT} solvers based on \ac{DPLL}.
+
+The responsibilities of the main function are as follows :
+
+- Parses command-line arguments and configures the solver appropriately.
+
+- Reads and processes the input DIMACS file (from a file or standard input) using the parse$\_$DIMACS() function.
+
+- Executes the simplify() method for unit propagation and pure literal elimination.
+
+- Calls the solveLimited() method to solve the \ac{SAT} problem using the \ac{CDCL} algorithm.
+
+- Outputs the result (SAT, UNSAT, or indeterminate) and, if specified, writes the solution to an output file.
+
+Now we're gonna move on to the Solver.cc file in which we find the main components of the \ac{CDCL} solver which are as follows :
+
+- Propagation: The propagate() function performs unit propagation, identifying and enqueues implied literals based on the current assignment\cite{sat-solver}. The following pseudocode\cite{sat-solver} showcases how propagate() works:
+
+\begin{lstlisting}
+Constr Solver.propagate()
+    while (propQ.size() > 0)
+        // `p' is now the enqueued fact to propagate
+        lit p = propQ.dequeue();
+        // `tmp' will contain the watcher list for 'p'
+        Vec(Constr) tmp;       
+        watches[index(p)].moveTo(tmp);
+
+        for (int i = 0; i < tmp.size(); i++)
+            if (!tmp[i].propagate(this, p))
+                // Constraint is conflicting
+                // copy remaining watches to 'watches[p]'
+                // and return constraint:
+                for (int j = i+1; j < tmp.size(); j++)
+                    watches[index(p)].push(tmp[j]);
+                propQ.clear();
+                return tmp[i];
+    return NULL;
+\end{lstlisting}
+
+- Conflict Analysis: The analyze() function analyzes a conflict clause to decide the asserting literal and appropriate backtrack level so that we can resolve the conflict\cite{sat-solver}. The following pseudocode\cite{sat-solver} showcases how analyze() works:
+
+\begin{lstlisting}
+void Solver.analyze(Constr confl, // 
+                Vec(lit) out_learnt, Int& out_btlevel)
+    Vec(bool) seen(nVars(), FALSE)
+    int counter = 0
+    lit p = ~lit
+    Vec(lit) p_reason
+    // Leave room for the asserting literal
+    out_learnt.push()  
+    out_btlevel = 0
+    do
+        p_reason.clear()
+        // invariant here: confl != NULL
+        confl.calcReason(this, p, p_reason)  
+        // Trace reason for p:
+        for (int j = 0; j < p_reason.size(); j++) 
+            lit q = p_reason[j]
+            if (!seen[var(q)]) {
+                seen[var(q)] = TRUE
+                if (level[var(q)] == decisionLevel())
+                    counter++
+                // exclude variables from decision level 0
+                else if (level[var(q)] > 0)  
+                    out_learnt.push(~q)
+                    out_btlevel = max(out_btlevel, level[var(q)])
+        // Select the next literal to look at:
+        do
+            p = trail.last()
+            confl = reason[var(p)]
+            undoOne()
+        while (!seen[var(p)])
+        counter--
+    while (counter > 0)
+    out_learnt[0] = ~p
+\end{lstlisting}
+
+- Clause Database Management: The solver includes functions to manage the clause database effectively such as reduceDB() which periodically removes less active learned clauses to maintain efficiency and removeSatisfied() which eliminates clauses that are already satisfied\cite{sat-solver}. The following pseudocode\cite{sat-solver} showcases how reduceDB() works:
+
+\begin{lstlisting}
+void Solver.reduceDB()
+    int i, j
+    double lim = cla_inc / learnts.size()
+    sortOnActivity(learnts)
+    for (i = j = 0; i < learnts.size() / 2; i++)
+        if (!learnts[i].locked(this))
+            learnts[i].remove(this)
+        else
+            learnts[j++] = learnts[i]
+    for (; i < learnts.size(); i++) 
+        if (!learnts[i].locked(this) && learnts[i].activity() < lim)
+            learnts[i].remove(this)
+        else
+            learnts[j++] = learnts[i]
+    learnts.shrink(i - j)
+\end{lstlisting}
+
+- Decision Heuristic: The pickBranchLit() function selects the next decision variable and its polarity based on variable activity, helping guide the search process.
+
+- Restarts: The search() function incorporates a restart strategy, assuming and propagating until a conflict is found, with support for using the Luby sequence to determine restart intervals, improving solver performance on challenging problems\cite{sat-solver}. The following pseudocode\cite{sat-solver} showcases how search() works:
+
+\begin{lstlisting}
+bool Solver.search(int nof_conflicts, //
+            int nof_learnts, SearchParams params)
+    int conflictC = 0
+    var_decay = 1 / params.var_decay
+    cla_decay = 1 / params.cla_decay
+    model.clear()
+
+    loop
+        Constr confl = propagate()
+        if (confl != NULL)
+            // Conflict
+            conflictC++
+            Vec(lit) learnt_clause
+            int backtrack_level
+            if (decisionLevel() == root_level)
+                return FALSE
+            analyze(confl, learnt_clause, backtrack_level)
+            cancelUntil(max(backtrack_level, root_level))
+            record(learnt_clause)
+            decayActivities()
+        else
+            // No conflict
+            if (decisionLevel() == 0)
+                // Simplify the set of problem clauses:
+                // our simplifier cannot return false here
+                simplifyDB()
+            if (learnts.size() / nAssigns() >= nof_learnts)
+                // Reduce the set of learned clauses:
+                reduceDB()
+            if (nAssigns() == nVars())
+                // Model found:
+                model.growTo(nVars())
+                for (int i = 0; i < nVars(); i++)
+                    model[i] = (value(i) == TRUE)
+                cancelUntil(root_level)
+                return TRUE
+            else if (conflictC >= nof_conflicts)
+                // Reached bound on the number of conflicts:
+                // force a restart
+                cancelUntil(root_level)
+                return FALSE
+            else
+                // New variable decision:
+                // may have a heuristic for polarity here
+                lit p = lit(order.select()) 
+                // cannot return false
+                assert(decisionLevel() > 0) 
+\end{lstlisting}
+
+- Garbage Collection: The garbageCollect() function reclaims unused memory by relocating clauses and reasons to a new memory region, ensuring efficient memory usage.
+
+Next is the Dimacs.h file.
+The \ac{DPLL} implementation in the Dimacs.h file focuses on handling the DIMACS input format, which is widely used by \ac{SAT} solvers. 
+
+This file contains key functions for parsing and processing the input to prepare it for solving:
+
+- readClause() Function: This function reads individual clauses from the DIMACS input and adds them to the solver's internal database. It's a critical step in setting up the problem for the DPLL algorithm.
+
+- parse$\_$DIMACS$\_$main() Function: This is the main parser loop that processes the DIMACS file. It reads the header and clauses, ensuring they are correctly added to the solver. This function plays a central role in initializing the DPLL algorithm.
+
+- parse$\_$DIMACS() Function: A wrapper around the main parser, this function handles the setup of the input stream and calls the core parsing logic.
+
+The last but not least is the Solver.h file.
+The Solver.h file contains the core methods and structures for implementing both the \ac{CDCL} and \ac{DPLL} algorithms, as well as essential supporting components:
+
+\ac{CDCL} Algorithm:
+
+- The solve() and solveLimited() Methods: These are the main entry points for solving SAT problems using the CDCL approach.
+
+- The analyze() Method: Performs conflict analysis and clause learning, which are key features of CDCL, enabling the solver to avoid repeating mistakes.
+
+- The propagate() Method: Handles unit propagation and detects conflicts during the solving process.
+
+- Decision Levels and Search State Tracking: Utilizes decision levels, reasons for variable assignments, and a trail to manage and monitor the current state of the search.
+
+\ac{DPLL} Algorithm:
+
+-The simplify() Method: Executes unit propagation and pure literal elimination, the foundational steps of the DPLL algorithm.
+
+-The enqueue() Method: Assigns values to variables during the solving process, helping to progress the search. The following pseudocode\cite{sat-solver} showcases how enqueue() works:
+
+\begin{lstlisting}
+bool Solver.enqueue(lit p, Constr from = NULL)
+    if (value(p) != l)
+        if (value(p) == FALSEL)
+            // Conflicting enqueued assignment
+            return false;
+        else
+            // Existing consistent assignment 
+            // - don't enqueue
+            return true;
+    else
+        // New fact, store it
+        assigns[var(p)] = lbool(!sign(p));
+        level[var(p)] = decisionLevel();
+        reason[var(p)] = from;
+        trail.push(p);
+        propQ.insert(p);
+        return true;
+\end{lstlisting}
+
+Supporting Components:
+
+- Watcher Lists and watches Data Structure: Efficiently monitors watched literals to optimize propagation.
+
+- order$\_$heap Priority Queue: Maintains an ordering of decision variables based on variable activity, improving the efficiency of the decision heuristic.
+
+- Clause Management: Includes operations for attaching, detaching, and removing clauses as needed.
+
+- Variable Activity Maintenance: Tracks and adjusts variable activity with a decay mechanism, ensuring the decision heuristic remains effective.
+
+The combination of these methods and components in Solver.h and all the other files analyzed provide the foundation for robust SAT solving using both the \ac{CDCL} and \ac{DPLL} algorithms.
+
+The following diagram showcases the relations between the classes that we talked about:
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{classdiagram.png}
+    \caption{Class Diagram}
+    \label{fig: Class Diagram}
+\end{figure}
+
+\subsection{Future Improvements}\label{Future Improvements}
+
+Our proposed improvement to the MiniSat code revolves around the Clause Deletion policies.
+
+MiniSat currently decides which learned clauses to keep by tracking how often they're involved in conflicts. Each clause gets a score that goes up when it helps find conflicts and slowly decreases over time. While this works okay, it has a problem - it often throws away clauses that are good at simplifying the formula just because they don't cause many conflicts.
+
+The strategy that we want to implement makes MiniSat smarter about which learned clauses to keep. Instead of just counting how many conflicts a clause causes, it looks at how often the clause helps simplify the problem through unit propagation. This means keeping useful clauses that guide the solver in the right direction, even if they don't directly cause conflicts. The deletion rules also adapt based on solver performance, which helps maintain efficiency.
+
+By doing this, we want to improve how we delete clauses by looking at how often they help with propagation, not just conflicts. This way, we keep clauses that are good at simplifying the problem, even if they don't cause many conflicts, thus achieving a better balance of memory use and performance, which should help solve complex problems faster.
+
 
 \newpage
 
-\begin{credits}
-\subsubsection{\ackname} 
+\section{Experimental Results}\label{Experimental Results}
 
-\subsubsection{\discintname}
+The following experimental results for the Hamiltonian family of tests were taken from the following link: \url{https://benchmark-database.de/?track=main_2024}. For the test, the following computer with the mentioned specs was used: 
+OS: Windows 11 Pro,
+Processor: 12th Gen Intel(R) Core(TM) i5-12500H 2.50 GHz,
+RAM: 16,0 GB (15,8 GB usable).
 
-\end{credits}
+\input{table1}
+
+Total approximate runtime: 8 hours and 30 minutes.
+
+%\begin{credits}
+%\subsubsection{\ackname} 
+
+%\subsubsection{\discintname}
+
+%\end{credits}
 %
 % ---- Bibliography ----
 %
@@ -127,25 +461,37 @@ Some challenges can arise from installing MiniSat, however, besides having troub
 %
 \newpage
 
-{\noindent \huge \textbf{List of acronyms}\par}
-
-\begin{acronym}
- \acro{SAT}{Boolean satisfiability problem}
- \acro{e.g.}{example}
- \acro{NP-complete}{Nondeterministic Polynomial-Time complete}
- \acro{EDA}{electronic design automation}
- \acro{DPLL}{Davis Putnam Logemann Loveland}
- \acro{CDCL}{conflict-driven clause learning}
- \acro{UML}{Unified Modeling Language}
- \acro{CNF}{Conjunctive Normal Form}
-  \acro{WSL}{Windows Subsystem for Linux}
-\end{acronym}
 \begin{thebibliography}{8}
 \bibitem{sat-solver}
 Authors: Niklas Een, Niklas Sorensson; Institute: Chalmers University of Technology, Sweden; Paper title: An Extensible SAT-solver[extended version 1.2]
 
+\bibitem{SAT}
+Authors: Stephen A. Cook; Institute: University of Toronto; Paper title: The Complexity of Theorem-Proving Procedures
+
 \bibitem{minisat}
 MiniSat documentation, \url{http://minisat.se/Main.html}
 
+\bibitem{DPLL}
+Authors: Martin Davis, George Logemann, and
+Donald Loveland,
+Institute of Mathematical Sciences, New York University; Paper title: Machine Program for Theorem-Proving
+
+\bibitem{CDCL}
+ Authors: Martin Davies,
+Rensselaer Polytechnic Institute, Hartford Division, East Windsor Hill, Conn.
+AND
+Hilary Putnam
+Princeton University, Princeton, New Jersey; Paper title: A Computing Procedure for Quantification Theory
+
 \end{thebibliography}
+\newpage
+Impartire task uri:
+
+Stoentel Alexandru-Eduard - Rularea, Algoritmii CDCL \& DPLL
+
+Andries Rafael Gabriel - Diagramele UML și Pseudocodul
+
+Șova Dumitru Ștefan Andrei - latex report
+
+Nenescu Eugeniu - Îmbunătățirea Algoritmilor și Pseudocodul
 \end{document}
