@@ -1,6 +1,8 @@
 # VF-Software-Engineering-2024-Project
 MiniSat Project and report for the Formal Verification course
 
+- Saptamana 10: am discutat am accentuat detaliile de la CDCL, am sintetizat pseudocodurile si le-am micsorat aparitiile, am discutat problemele pe care proiectul inca le intampina si vor trebui rezolvate in urmatoarele saptaman.
+
 ================================================================================
 MiniSat README: 
 
