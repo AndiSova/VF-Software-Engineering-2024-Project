@@ -13,6 +13,7 @@ TO DO IN THE FOLLOWING WEEKS:
 - Explicarea complexitatii familiei hamiltoniane -Rafa ~ Andi
 
 ================================================================================
+
 MiniSat README: 
 
 Quick Install
