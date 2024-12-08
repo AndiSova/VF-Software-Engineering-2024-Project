@@ -1,6 +1,8 @@
 # VF-Software-Engineering-2024-Project
 MiniSat Project and report for the Formal Verification course
 
+Project Link: https://github.com/AndiSova/VF-Software-Engineering-2024-Project
+
 - Saptamana 10: am discutat am accentuat detaliile de la CDCL, am discutat problemele pe care proiectul inca le intampina si vor trebui rezolvate in urmatoarele saptaman.
 
 TO DO IN THE FOLLOWING WEEKS:
