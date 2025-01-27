@@ -21,8 +21,11 @@ Andries Rafael Gabriel: Brainstorming pentru optimizare și cercetare despre fam
 Săptămâna 11:
 Am împărțit sarcinile între noi și am consolidat unele dintre lucrurile discutate la întâlnirea de săptămâna trecută.
 
+
 Stoențel Alexandru-Eduard: Procesul de instalare MiniSat cu ajutorul WSL, rularea familiei Hamiltoniene, explicarea aplicării în scris a CDCL, redactarea pseudocodului, rezultatele experimentului.
+
 Nenescu Eugeniu: Rularea MiniSat-ului pe o mașină virtuală (Virtual Machine), optimizarea codului și descrierea modului în care codul a fost optimizat; redactarea unei concluzii pe baza rezultatelor obținute în urma rulării unui benchmark cu MiniSat optimizat.
+
 Andries Rafael Gabriel: Redactarea introducerii, redactarea diagramelor UML și a pseudocodului, redactarea concluziei.
 
 ================================================================================
