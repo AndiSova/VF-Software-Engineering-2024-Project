@@ -3,16 +3,27 @@ MiniSat Project and report for the Formal Verification course
 
 Project Link: https://github.com/AndiSova/VF-Software-Engineering-2024-Project
 
-- Saptamana 10: am discutat am accentuat detaliile de la CDCL, am discutat problemele pe care proiectul inca le intampina si vor trebui rezolvate in urmatoarele saptaman.
+Săptămâna 14:
+Stoențel Alexandru-Eduard: Creare video
+Nenescu Eugeniu: Creare video
+Andries Rafael Gabriel: Creare video
 
-TO DO IN THE FOLLOWING WEEKS:
-- Imbunatatirea partii despre algoritmi DPLL si CDCL - Alex
-- Revizuirea diagramelor - Rafa
-- Crearea diagramei de secventa - Rafa
-- Sintetizarea codului in pseudocod -  Eugen
-- Corectarea sectiei de reference - Andi (done)
-- Debugging pe un caz concret - Toti
-- Explicarea complexitatii familiei hamiltoniane -Rafa ~ Andi
+Săptămâna 13:
+Stoențel Alexandru-Eduard: Cercetare suplimentară CDCL și redactarea pseudocodului
+Nenescu Eugeniu: Rulare benchmark pe cod optimizat și luarea unor note suplimentare
+Andries Rafael Gabriel: Actualizare PDF și optimizarea diagramelor UML
+
+Săptămâna 12:
+Stoențel Alexandru-Eduard: Brainstorming pentru optimizare și cercetare despre familia hamiltoniană
+Nenescu Eugeniu: Optimizare cod și observații asupra rezultatelor
+Andries Rafael Gabriel: Brainstorming pentru optimizare și cercetare despre familia hamiltoniană
+
+Săptămâna 11:
+Am împărțit sarcinile între noi și am consolidat unele dintre lucrurile discutate la întâlnirea de săptămâna trecută.
+
+Stoențel Alexandru-Eduard: Procesul de instalare MiniSat cu ajutorul WSL, rularea familiei Hamiltoniene, explicarea aplicării în scris a CDCL, redactarea pseudocodului, rezultatele experimentului.
+Nenescu Eugeniu: Rularea MiniSat-ului pe o mașină virtuală (Virtual Machine), optimizarea codului și descrierea modului în care codul a fost optimizat; redactarea unei concluzii pe baza rezultatelor obținute în urma rulării unui benchmark cu MiniSat optimizat.
+Andries Rafael Gabriel: Redactarea introducerii, redactarea diagramelor UML și a pseudocodului, redactarea concluziei.
 
 ================================================================================
 
