@@ -4,17 +4,17 @@ MiniSat Project and report for the Formal Verification course
 Project Link: https://github.com/AndiSova/VF-Software-Engineering-2024-Project
 
 Săptămâna 14:
-Stoențel Alexandru-Eduard: Creare video
+Stoentel Alexandru-Eduard: Creare video
 Nenescu Eugeniu: Creare video
 Andries Rafael Gabriel: Creare video
 
 Săptămâna 13:
-Stoențel Alexandru-Eduard: Cercetare suplimentară CDCL și redactarea pseudocodului
+Stoentel Alexandru-Eduard: Cercetare suplimentară CDCL și redactarea pseudocodului
 Nenescu Eugeniu: Rulare benchmark pe cod optimizat și luarea unor note suplimentare
 Andries Rafael Gabriel: Actualizare PDF și optimizarea diagramelor UML
 
 Săptămâna 12:
-Stoențel Alexandru-Eduard: Brainstorming pentru optimizare și cercetare despre familia hamiltoniană
+Stoentel Alexandru-Eduard: Brainstorming pentru optimizare și cercetare despre familia hamiltoniană
 Nenescu Eugeniu: Optimizare cod și observații asupra rezultatelor
 Andries Rafael Gabriel: Brainstorming pentru optimizare și cercetare despre familia hamiltoniană
 
