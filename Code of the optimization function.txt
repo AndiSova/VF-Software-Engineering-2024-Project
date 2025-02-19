@@ -1,0 +1,18 @@
+void Solver::adjustVarDecay() {
+    // Ajustăm var_decay pe baza numărului de conflicte
+    if (conflicts < 1000) {
+        var_decay = 0.95;
+    } else if (conflicts < 10000) {
+        var_decay = 0.99;
+    } else {
+        // Strategie adaptivă: ajustăm în funcție de rata conflictelor
+        double recentConflictRate = (double)conflicts / (conflicts + 1); // Normalizare
+        if (recentConflictRate > 0.999) {  // Multe conflicte, explorăm mai mult
+            var_decay = std::max(0.95, var_decay * 0.99);
+        } else if (recentConflictRate > 0.99) {  // Mediu
+            var_decay = std::max(0.98, var_decay * 0.999);
+        } else {  // Stabilizare
+            var_decay = std::min(0.9999, var_decay * 1.0001);
+        }
+    }
+}
